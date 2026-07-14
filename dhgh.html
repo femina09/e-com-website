@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Artificial Cynara Scolymus — Interactive Product Demo</title>
+<meta name="description" content="Interactive demo product page (Etsy-style features, original design)" />
+<style>
+  :root{
+    --bg:#fff; --surface:#fff; --muted:#6b7280; --accent:#ff7a1a;
+    --ink:#0f1724; --success:#0a7d2a; --danger:#dc2626; --shadow: 0 6px 24px rgba(12,18,26,0.08);
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .page{max-width:1200px;margin:24px auto;padding:0 16px}
+  header{display:flex;align-items:center;gap:16px;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eef2f7}
+  .brand{font-weight:700;font-size:18px}
+  .top-actions{display:flex;gap:12px;align-items:center}
+  .pill{padding:8px 12px;border-radius:999px;border:1px solid #e6e9ef;background:var(--surface);cursor:pointer}
+  .cart-btn{position:relative}
+  .badge{position:absolute;top:-6px;right:-8px;background:var(--danger);color:#fff;font-size:12px;padding:2px 6px;border-radius:999px}
+  /* grid */
+  .grid{display:grid;grid-template-columns:1fr 420px;gap:28px;margin-top:18px}
+  @media (max-width:1024px){.grid{grid-template-columns:1fr}}
+  /* gallery */
+  .gallery{background:linear-gradient(180deg,#fafafa,#fff);padding:12px;border-radius:var(--radius);border:1px solid #eef2f7}
+  .main-frame{position:relative;border-radius:10px;overflow:hidden;background:#000}
+  .main-frame img{width:100%;height:520px;object-fit:cover;display:block}
+  @media (max-width:1024px){.main-frame img{height:360px}}
+  @media (max-width:640px){.main-frame img{height:300px}}
+  .thumbs{display:flex;gap:8px;margin-top:10px;overflow:auto;padding-bottom:4px}
+  .thumb{width:84px;height:84px;flex:0 0 84px;border-radius:8px;overflow:hidden;border:2px solid transparent;cursor:pointer}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .thumb.active{border-color:var(--accent)}
+  /* magnifier lens */
+  .lens{position:absolute;border-radius:999px;pointer-events:none;box-shadow:0 6px 20px rgba(2,6,23,0.35);border:6px solid rgba(255,255,255,0.5);width:140px;height:140px;display:none;transform:translate(-50%,-50%);z-index:30}
+  /* info panel */
+  .info{background:var(--surface);padding:18px;border-radius:var(--radius);border:1px solid #eef2f7;position:relative}
+  .title{font-size:22px;font-weight:700;margin-bottom:6px}
+  .meta{color:var(--muted);font-size:14px;margin-bottom:10px}
+  .price-row{display:flex;gap:12px;align-items:center;margin:14px 0}
+  .price{font-size:22px;font-weight:800}
+  .stock{color:var(--success);font-weight:600;font-size:14px}
+  .variants{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  .variant-btn{padding:8px 12px;border-radius:8px;border:1px solid #e6e9ef;background:#fff;cursor:pointer}
+  .variant-btn[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 2px rgba(0,0,0,0.03)}
+  .qty-row{display:flex;align-items:center;gap:8px;margin-top:12px}
+  .qty{display:flex;border-radius:8px;overflow:hidden;border:1px solid #e6e9ef}
+  .qty button{background:#f7f7fb;border:0;padding:10px 12px;cursor:pointer}
+  .qty input{width:64px;border:0;padding:8px;text-align:center}
+  .actions{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap}
+  .btn{padding:12px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:700}
+  .btn-primary{background:var(--ink);color:#fff}
+  .btn-accent{background:var(--accent);color:#fff}
+  .btn-ghost{background:transparent;border:1px solid #e6e9ef}
+  .small{font-size:13px;padding:8px 10px}
+  /* sticky bottom on mobile */
+  .sticky-mobile{display:none;position:fixed;left:0;right:0;bottom:0;padding:10px;background:#fff;border-top:1px solid #eef2f7;gap:10px;z-index:90}
+  .sticky-mobile .btn{flex:1}
+  @media (max-width:720px){.sticky-mobile{display:flex}}
+  /* cart drawer */
+  .drawer{position:fixed;right:-420px;top:0;height:100vh;width:420px;background:#fff;border-left:1px solid #eef2f7;box-shadow:-12px 0 40px rgba(3,8,23,0.08);transition:right .36s ease;z-index:120;display:flex;flex-direction:column}
+  .drawer.open{right:0}
+  .drawer header{padding:16px;border-bottom:1px solid #eef2f7;display:flex;justify-content:space-between;align-items:center}
+  .drawer .items{overflow:auto;padding:12px;flex:1}
+  .drawer .item{display:flex;gap:10px;align-items:center;padding:10px;border-radius:8px}
+  .drawer .item img{width:64px;height:64px;object-fit:cover;border-radius:6px}
+  .drawer footer{padding:12px;border-top:1px solid #eef2f7}
+  /* reviews and Q&A */
+  .tabs{display:flex;gap:12px;border-bottom:1px solid #eef2f7;margin-top:18px}
+  .tab{padding:12px 8px;cursor:pointer;border-bottom:2px solid transparent}
+  .tab.active{border-color:var(--ink);font-weight:700}
+  .panel{display:none;padding:18px 0}
+  .panel.active{display:block}
+  .review-card{background:#fff;padding:12px;border-radius:10px;border:1px solid #eef2f7;margin-bottom:12px}
+  .stars{color:#f59e0b}
+  /* Q/A */
+  .qa-form textarea{width:100%;min-height:72px;padding:10px;border-radius:8px;border:1px solid #eef2f7}
+  /* similar items */
+  .similar{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px}
+  .sim-card{min-width:160px;border-radius:10px;overflow:hidden;background:#fff;border:1px solid #eef2f7}
+  .sim-card img{width:100%;height:120px;object-fit:cover}
+  .sim-card .meta{padding:8px}
+  /* toast */
+  .toast{position:fixed;top:24px;right:24px;background:#111;color:#fff;padding:10px 14px;border-radius:8px;opacity:0;transform:translateY(-6px);transition:all .28s ease;z-index:200}
+  .toast.show{opacity:1;transform:none}
+  /* small helpers */
+  .muted{color:var(--muted)}
+  .flex{display:flex;align-items:center;gap:8px}
+</style>
+</head>
+<body>
+  <div class="page" id="page">
+    <header>
+      <div class="brand">GreenDecor (Demo)</div>
+      <div class="top-actions">
+        <button class="pill" id="themeToggle" aria-pressed="false">🌙</button>
+        <div class="cart-btn">
+          <button class="pill" id="openCart" aria-haspopup="dialog" aria-controls="cartDrawer">🛒 View cart</button>
+          <span class="badge" id="cartCount">0</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="grid" id="productPage" aria-labelledby="productTitle">
+      <!-- LEFT: gallery -->
+      <section class="gallery" aria-label="Product gallery">
+        <div class="main-frame" id="mainFrame" tabindex="0">
+          <img id="mainImage" src="https://picsum.photos/id/1016/1400/900" alt="Artificial Cynara Scolymus product" />
+          <div class="lens" id="lens" aria-hidden="true"></div>
+        </div>
+
+        <div class="thumbs" id="thumbs" aria-label="Product thumbnails">
+          <!-- thumbnails will be injected -->
+        </div>
+
+        <!-- Lightbox -->
+        <div id="lightbox" role="dialog" aria-hidden="true" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.85);align-items:center;justify-content:center;z-index:150">
+          <button aria-label="Close lightbox" id="closeLightbox" style="position:absolute;top:18px;right:18px;padding:8px;border-radius:8px;background:#fff;border:none;cursor:pointer">✕</button>
+          <img id="lightboxImg" src="" style="max-width:94%;max-height:88%;border-radius:10px;box-shadow:var(--shadow)" alt="">
+        </div>
+      </section>
+
+      <!-- RIGHT: info -->
+      <aside class="info" id="info">
+        <div>
+          <h1 id="productTitle" class="title">Artificial Cynara Scolymus — Quality Faux Artichoke Plant</h1>
+          <div class="meta">by <strong>GreenDecor</strong> • <span id="ratingText" class="muted">4.8 (127 reviews)</span></div>
+
+          <div class="price-row">
+            <div class="price" id="price">$39.99</div>
+            <div class="stock" id="stockMsg">Only 10 left</div>
+          </div>
+
+          <!-- variants -->
+          <div>
+            <div class="muted">Size</div>
+            <div class="variants" id="sizeVariants">
+              <!-- variant buttons -->
+            </div>
+          </div>
+
+          <div style="margin-top:10px">
+            <div class="muted">Color</div>
+            <div class="variants" id="colorVariants"></div>
+          </div>
+
+          <div class="qty-row" style="margin-top:12px">
+            <div class="muted">Quantity</div>
+            <div style="flex:1"></div>
+            <div class="qty" role="group" aria-label="Quantity selector">
+              <button id="qtyDec" aria-label="Decrease">−</button>
+              <input id="qtyInput" type="number" min="1" value="1" aria-live="polite">
+              <button id="qtyInc" aria-label="Increase">+</button>
+            </div>
+          </div>
+
+          <!-- actions -->
+          <div class="actions">
+            <button class="btn btn-primary" id="addCartBtn">Add to cart</button>
+            <button class="btn btn-accent" id="buyNowBtn">Buy now</button>
+            <button class="btn btn-ghost small" id="wishBtn" aria-pressed="false">♡ Add to wishlist</button>
+          </div>
+
+          <div class="muted" style="margin-top:12px">Free shipping over $35 • 30-day returns</div>
+
+          <!-- small seller card -->
+          <div style="margin-top:16px;border-top:1px dashed #eef2f7;padding-top:12px;display:flex;gap:10px;align-items:center">
+            <img src="https://picsum.photos/seed/seller/80" alt="seller avatar" style="width:56px;height:56px;border-radius:10px;object-fit:cover">
+            <div>
+              <div style="font-weight:700">GreenDecor Shop</div>
+              <div class="muted" style="font-size:13px">Selling since 2019 • 4,200 sales</div>
+            </div>
+            <div style="margin-left:auto">
+              <button class="pill" id="contactSeller">Contact</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Tabs (full width below grid) -->
+      <div style="grid-column:1/-1">
+        <nav class="tabs" role="tablist" aria-label="Product tabs">
+          <button class="tab active" role="tab" aria-selected="true" data-target="descPanel">Description</button>
+          <button class="tab" role="tab" aria-selected="false" data-target="detailsPanel">Details</button>
+          <button class="tab" role="tab" aria-selected="false" data-target="reviewsPanel">Reviews</button>
+          <button class="tab" role="tab" aria-selected="false" data-target="shippingPanel">Shipping</button>
+          <button class="tab" role="tab" aria-selected="false" data-target="qaPanel">Q & A</button>
+        </nav>
+
+        <section id="descPanel" class="panel active">
+          <p>This handcrafted faux Cynara scolymus (artichoke) brings Mediterranean charm to any room. High-quality silk leaves, bendable stems, and realistic coloring make it indistinguishable from the real plant at a glance.</p>
+          <ul>
+            <li>Available in 12", 18", 24"</li>
+            <li>Durable, fade-resistant materials</li>
+            <li>Ships with a simple nursery pot</li>
+          </ul>
+        </section>
+
+        <section id="detailsPanel" class="panel">
+          <h3>Product details</h3>
+          <ul>
+            <li>Materials: Silk, plastic, wire stems</li>
+            <li>Weight: 0.5 lb / 0.8 lb / 1.2 lb (by size)</li>
+            <li>Care: Wipe with a soft cloth</li>
+            <li>SKU: GD-AS-001</li>
+          </ul>
+        </section>
+
+        <section id="reviewsPanel" class="panel">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <div style="font-size:22px;font-weight:800;color:#d97706">4.8</div>
+            <div class="muted">Average • <span id="reviewCount">127</span> reviews</div>
+          </div>
+
+          <div id="reviewList" aria-live="polite">
+            <!-- reviews injected -->
+          </div>
+
+          <form id="reviewForm" style="margin-top:12px;display:grid;gap:8px,max-width:720px">
+            <div class="muted">Leave a review</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <label class="muted">Rating</label>
+              <select id="reviewRating" aria-label="Rating">
+                <option value="5">5 — Excellent</option>
+                <option value="4">4 — Good</option>
+                <option value="3">3 — Okay</option>
+                <option value="2">2 — Poor</option>
+                <option value="1">1 — Terrible</option>
+              </select>
+            </div>
+            <textarea id="reviewText" placeholder="Share your experience…" rows="3" style="border:1px solid #eef2f7;padding:10px;border-radius:8px"></textarea>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-primary" type="submit">Submit review</button>
+              <div class="muted" style="align-self:center;font-size:13px">Reviews saved locally (demo)</div>
+            </div>
+          </form>
+        </section>
+
+        <section id="shippingPanel" class="panel">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input id="postal" placeholder="Enter PIN / ZIP" style="padding:10px;border-radius:8px;border:1px solid #eef2f7">
+            <button class="pill" id="checkShip">Check delivery</button>
+            <div id="eta" class="muted" aria-live="polite"></div>
+          </div>
+          <p class="muted" style="margin-top:10px">Ships from California. International shipping times/rates vary.</p>
+        </section>
+
+        <section id="qaPanel" class="panel">
+          <div id="qaList" style="margin-bottom:12px"></div>
+          <form id="qaForm" class="qa-form" style="display:grid;gap:8px;max-width:720px">
+            <input id="qaName" placeholder="Your name" style="padding:10px;border-radius:8px;border:1px solid #eef2f7">
+            <textarea id="qaQuestion" placeholder="Ask a question about this product…" rows="3" style="padding:10px;border-radius:8px;border:1px solid #eef2f7"></textarea>
+            <button class="pill" type="submit">Submit question</button>
+            <div class="muted">Questions are saved locally for this demo.</div>
+          </form>
+        </section>
+      </div>
+
+      <!-- Similar items -->
+      <div style="grid-column:1/-1;margin-top:18px">
+        <h3>You might also like</h3>
+        <div class="similar" id="similar">
+          <!-- cards injected -->
+        </div>
+      </div>
+    </main>
+
+    <!-- sticky mobile CTA -->
+    <div class="sticky-mobile" role="region" aria-label="mobile actions">
+      <button class="btn btn-primary" id="mobileAdd">Add to cart</button>
+      <button class="btn btn-accent" id="mobileBuy">Buy</button>
+    </div>
+
+    <!-- cart drawer -->
+    <aside class="drawer" id="cartDrawer" role="dialog" aria-hidden="true" aria-label="Cart drawer">
+      <header><strong>Cart</strong><button class="pill" id="closeCart">Close</button></header>
+      <div class="items" id="cartItems" tabindex="0"></div>
+      <footer>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="muted">Subtotal</div>
+          <div id="cartSubtotal" style="font-weight:800">$0.00</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-accent" id="checkoutBtn">Checkout</button>
+          <button class="pill" id="clearCart">Clear</button>
+        </div>
+      </footer>
+    </aside>
+
+    <!-- toast -->
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+
+<script>
+/* =========================
+   Demo product data & state
+   ========================= */
+const PRODUCT = {
+  id: 'gd-as-001',
+  title: 'Artificial Cynara Scolymus — Quality Faux Artichoke Plant',
+  basePrice: 39.99,
+  variants: {
+    size: [
+      {id:'small',label:'Small (12")',price:39.99,stock:10,images:[ 'https://picsum.photos/id/1016/1400/900','https://picsum.photos/id/1015/1400/900' ]},
+      {id:'medium',label:'Medium (18")',price:59.99,stock:5,images:[ 'https://picsum.photos/id/1018/1400/900','https://picsum.photos/id/1019/1400/900' ]},
+      {id:'large',label:'Large (24")',price:79.99,stock:2,images:[ 'https://picsum.photos/id/1020/1400/900','https://picsum.photos/id/1021/1400/900' ]}
+    ],
+    color: [
+      {id:'natural',label:'Natural Green'},
+      {id:'olive',label:'Olive'}
+    ]
+  },
+  reviews: [
+    {name:'Sarah J.',rating:5,text:'This artichoke plant is absolutely gorgeous! The quality is exceptional.',date:'2025-06-15'},
+    {name:'Michael T.',rating:4,text:'Very realistic looking plant. Leaves arrived slightly bent but fixed.',date:'2025-05-28'},
+    {name:'Emily R.',rating:5,text:'Perfect addition to my kitchen! Shipping was fast too.',date:'2025-05-10'}
+  ]
+};
+
+let state = {
+  selectedSize: PRODUCT.variants.size[0].id,
+  selectedColor: PRODUCT.variants.color[0].id,
+  qty: 1,
+  cart: JSON.parse(localStorage.getItem('demo_cart')||'[]'),
+  wishlist: JSON.parse(localStorage.getItem('demo_wishlist')||'[]'),
+  reviews: JSON.parse(localStorage.getItem('demo_reviews')||JSON.stringify(PRODUCT.reviews)),
+  qa: JSON.parse(localStorage.getItem('demo_qa')||'[]')
+};
+
+/* =========================
+   Utility UI helpers
+   ========================= */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+function toast(msg, time=1800){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), time);
+}
+
+/* =========================
+   Render: thumbnails, variants, similar, reviews, cart
+   ========================= */
+function currentVariantSize(){
+  return PRODUCT.variants.size.find(v=>v.id===state.selectedSize);
+}
+
+function renderThumbs(){
+  const thumbs = $('#thumbs'); thumbs.innerHTML = '';
+  const images = currentVariantSize().images;
+  images.forEach((src,i)=>{
+    const d = document.createElement('div'); d.className='thumb';
+    if(i===0) d.classList.add('active');
+    d.innerHTML = `<img src="${src}" alt="thumb ${i+1}">`;
+    d.addEventListener('click',()=>{
+      $('#mainImage').src = src;
+      $$('.thumb').forEach(t=>t.classList.remove('active'));
+      d.classList.add('active');
+    });
+    thumbs.appendChild(d);
+  });
+  // set main image
+  $('#mainImage').src = images[0];
+}
+
+/* render variant buttons */
+function renderVariants(){
+  const sizeWrap = $('#sizeVariants'); sizeWrap.innerHTML = '';
+  PRODUCT.variants.size.forEach(v=>{
+    const btn = document.createElement('button');
+    btn.className='variant-btn';
+    btn.textContent = v.label;
+    btn.setAttribute('aria-pressed', String(v.id===state.selectedSize));
+    btn.addEventListener('click',()=>{
+      state.selectedSize = v.id;
+      state.qty = Math.min(state.qty, v.stock);
+      renderAll();
+      toast(`Selected ${v.label}`);
+    });
+    sizeWrap.appendChild(btn);
+  });
+
+  const colorWrap = $('#colorVariants'); colorWrap.innerHTML = '';
+  PRODUCT.variants.color.forEach(c=>{
+    const btn = document.createElement('button');
+    btn.className='variant-btn';
+    btn.textContent = c.label;
+    btn.setAttribute('aria-pressed', String(c.id===state.selectedColor));
+    btn.addEventListener('click',()=>{
+      state.selectedColor = c.id;
+      renderAll();
+      toast(`Selected ${c.label}`);
+    });
+    colorWrap.appendChild(btn);
+  });
+}
+
+/* similar items (simple demo) */
+function renderSimilar(){
+  const sim = $('#similar'); sim.innerHTML='';
+  for(let i=1022;i<1026;i++){
+    const card = document.createElement('div'); card.className='sim-card';
+    card.innerHTML = `<img src="https://picsum.photos/id/${i}/400/300" alt="similar"><div class="meta"><strong>Faux plant ${i-1021}</strong><div class="muted">$${(15 + i%8).toFixed(2)}</div></div>`;
+    sim.appendChild(card);
+  }
+}
+
+/* reviews */
+function renderReviews(){
+  const list = $('#reviewList'); list.innerHTML='';
+  const reviews = state.reviews;
+  $('#reviewCount').textContent = reviews.length;
+  reviews.forEach(r=>{
+    const card = document.createElement('div'); card.className='review-card';
+    card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><div><strong>${r.name||'Anonymous'}</strong> <span class="muted" style="font-size:13px">• ${r.date||new Date().toISOString().slice(0,10)}</span></div><div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div></div><div style="margin-top:8px">${r.text}</div>`;
+    list.appendChild(card);
+  });
+}
+
+/* cart rendering */
+function saveCart(){ localStorage.setItem('demo_cart', JSON.stringify(state.cart)); $('#cartCount').textContent = state.cart.reduce((s,i)=>s+i.qty,0); }
+function openCartDrawer(){ $('#cartDrawer').classList.add('open'); $('#cartDrawer').setAttribute('aria-hidden','false'); }
+function closeCartDrawer(){ $('#cartDrawer').classList.remove('open'); $('#cartDrawer').setAttribute('aria-hidden','true'); }
+function renderCart(){
+  const wrap = $('#cartItems'); wrap.innerHTML = '';
+  let subtotal = 0;
+  state.cart.forEach((it, idx)=>{
+    subtotal += it.price * it.qty;
+    const row = document.createElement('div'); row.className='item';
+    row.innerHTML = `<img src="${it.img}" alt="${it.title}"><div style="flex:1"><div><strong>${it.title}</strong></div><div class="muted">${it.variantLabel}</div><div>$${it.price.toFixed(2)} × ${it.qty}</div></div><div><button class="pill small remove" data-idx="${idx}">Remove</button></div>`;
+    wrap.appendChild(row);
+  });
+  $('#cartSubtotal').textContent = '$' + subtotal.toFixed(2);
+  $$('.remove').forEach(b=>b.addEventListener('click', e=>{
+    const idx = +e.currentTarget.dataset.idx;
+    state.cart.splice(idx,1); saveCart(); renderCart(); toast('Removed from cart');
+  }));
+  saveCart();
+}
+
+/* wishlist */
+function toggleWishlist(){
+  const id = PRODUCT.id;
+  const idx = state.wishlist.indexOf(id);
+  if(idx===-1){ state.wishlist.push(id); toast('Added to wishlist'); }
+  else { state.wishlist.splice(idx,1); toast('Removed from wishlist'); }
+  localStorage.setItem('demo_wishlist', JSON.stringify(state.wishlist));
+  $('#wishBtn').setAttribute('aria-pressed', String(state.wishlist.includes(id)));
+  $('#wishBtn').textContent = state.wishlist.includes(id)?'♥ In wishlist':'♡ Add to wishlist';
+}
+
+/* =========================
+   Actions: add to cart, buy now, qty changes
+   ========================= */
+function addToCartAction(openDrawer=true){
+  const sizeObj = currentVariantSize();
+  if(state.qty > sizeObj.stock){ toast('Not enough stock'); return; }
+  const item = {
+    id: PRODUCT.id + '-' + state.selectedSize + '-' + state.selectedColor,
+    title: PRODUCT.title,
+    img: currentVariantSize().images[0],
+    price: sizeObj.price,
+    qty: state.qty,
+    variantLabel: `${sizeObj.label} • ${PRODUCT.variants.color.find(c=>c.id===state.selectedColor).label}`
+  };
+  // If same item exists, increment qty
+  const existing = state.cart.find(c => c.id === item.id);
+  if(existing){ existing.qty += item.qty; } else { state.cart.push(item); }
+  saveCart();
+  renderCart();
+  toast('Added to cart');
+  if(openDrawer) openCartDrawer();
+}
+
+/* =========================
+   Shipping ETA mock
+   ========================= */
+function checkShipping(zip){
+  if(!zip){ $('#eta').textContent = 'Enter a postal code'; return; }
+  const days = 4 + (zip.length % 5);
+  const d = new Date(); d.setDate(d.getDate() + days);
+  $('#eta').textContent = `Estimated delivery: ${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})}`;
+}
+
+/* =========================
+   Lightbox + Magnifier
+   ========================= */
+function initMagnifier(){
+  const frame = $('#mainFrame');
+  const img = $('#mainImage');
+  const lens = $('#lens');
+  let enabled = true;
+
+  function moveLens(e){
+    lens.style.display = 'block';
+    const rect = img.getBoundingClientRect();
+    // pointer location
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    const cx = Math.max(0, Math.min(rect.width, x));
+    const cy = Math.max(0, Math.min(rect.height, y));
+    lens.style.left = (rect.left + cx) + 'px';
+    lens.style.top = (rect.top + cy) + 'px';
+    // position background of lightbox? We'll simply show lens as visual indicator.
+  }
+
+  frame.addEventListener('mousemove', (e)=>{ if(enabled) moveLens(e); });
+  frame.addEventListener('mouseleave', ()=>{ lens.style.display='none'; });
+  frame.addEventListener('click', ()=>{
+    // open lightbox
+    $('#lightboxImg').src = img.src;
+    $('#lightbox').style.display = 'flex';
+    $('#lightbox').setAttribute('aria-hidden','false');
+  });
+  $('#closeLightbox').addEventListener('click', ()=>{ $('#lightbox').style.display='none'; $('#lightbox').setAttribute('aria-hidden','true'); });
+}
+
+/* =========================
+   Tabs control
+   ========================= */
+function initTabs(){
+  $$('.tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      $$('.tab').forEach(t=>t.classList.remove('active'));
+      $$('.tab').forEach(t=>t.setAttribute('aria-selected','false'));
+      tab.classList.add('active'); tab.setAttribute('aria-selected','true');
+      $$('.panel').forEach(p=>p.classList.remove('active'));
+      $('#' + tab.dataset.target).classList.add('active');
+      // smooth scroll to panel on mobile
+      if(window.innerWidth < 720) document.querySelector('#' + tab.dataset.target).scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
+}
+
+/* =========================
+   Q/A and reviews submission
+   ========================= */
+function initQA(){
+  const qForm = $('#qaForm');
+  const qList = $('#qaList');
+  function renderQA(){ qList.innerHTML=''; state.qa.slice().reverse().forEach(q=>{
+    const d = document.createElement('div'); d.style.marginBottom='8px';
+    d.innerHTML = `<div style="font-weight:700">${escapeHtml(q.name||'Anonymous')}</div><div class="muted" style="font-size:13px">${escapeHtml(q.question)}</div><div class="muted" style="font-size:12px">${q.date}</div>`;
+    qList.appendChild(d);
+  }); }
+  qForm.addEventListener('submit', (ev)=>{
+    ev.preventDefault();
+    const name = $('#qaName').value.trim()||'Anonymous';
+    const q = $('#qaQuestion').value.trim();
+    if(!q){ toast('Write a question'); return; }
+    const obj = {name,question:q,date:new Date().toISOString().slice(0,10)};
+    state.qa.push(obj);
+    localStorage.setItem('demo_qa', JSON.stringify(state.qa));
+    $('#qaName').value=''; $('#qaQuestion').value='';
+    renderQA(); toast('Question submitted');
+  });
+  renderQA();
+}
+
+function initReviews(){
+  const form = $('#reviewForm');
+  form.addEventListener('submit', (ev)=>{
+    ev.preventDefault();
+    const rating = +$('#reviewRating').value;
+    const text = $('#reviewText').value.trim();
+    if(!text){ toast('Write a quick review'); return; }
+    const obj = {name:'You', rating, text, date:new Date().toISOString().slice(0,10)};
+    state.reviews.unshift(obj);
+    localStorage.setItem('demo_reviews', JSON.stringify(state.reviews));
+    $('#reviewText').value='';
+    renderReviews();
+    toast('Thanks for your review');
+  });
+  renderReviews();
+}
+
+/* =========================
+   Misc init & events
+   ========================= */
+function escapeHtml(s){ return (s+'').replace(/[&<>"]/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function renderAll(){
+  renderVariants();
+  renderThumbs();
+  // price & stock
+  const v = currentVariantSize();
+  $('#price').textContent = '$' + v.price.toFixed(2);
+  $('#stockMsg').textContent = v.stock>0 ? `Only ${v.stock} left` : 'Out of stock';
+  // update qty input max
+  $('#qtyInput').value = state.qty;
+  // update pay buttons disabled state if out of stock
+  const disabled = v.stock===0;
+  $('#addCartBtn').disabled = disabled;
+  $('#buyNowBtn').disabled = disabled;
+  $('#mobileAdd').disabled = disabled; $('#mobileBuy').disabled = disabled;
+  // update variant aria
+  $$('.variant-btn').forEach(b=>{
+    const txt = b.textContent;
+    if(txt.includes(v.label)) b.setAttribute('aria-pressed','true'); else b.setAttribute('aria-pressed','false');
+  });
+}
+
+/* initial render */
+function init(){
+  // populate variants, thumbs, similar, reviews, cart
+  renderAll();
+  renderSimilar();
+  renderReviews();
+  renderCart();
+  $('#cartCount').textContent = state.cart.reduce((s,i)=>s+i.qty,0);
+  // attach events
+  $('#qtyInc').addEventListener('click', ()=>{ state.qty = Math.min(currentVariantSize().stock, state.qty + 1); $('#qtyInput').value = state.qty; });
+  $('#qtyDec').addEventListener('click', ()=>{ state.qty = Math.max(1, state.qty -1); $('#qtyInput').value = state.qty; });
+  $('#qtyInput').addEventListener('change', ()=>{ const v = Math.max(1, Math.min(currentVariantSize().stock, +$('#qtyInput').value || 1)); state.qty = v; $('#qtyInput').value = v; });
+
+  // add to cart
+  $('#addCartBtn').addEventListener('click', ()=> addToCartAction(true));
+  $('#mobileAdd').addEventListener('click', ()=> addToCartAction(false));
+  $('#buyNowBtn').addEventListener('click', ()=> { addToCartAction(true); toast('Proceeding to checkout (demo)'); });
+  $('#mobileBuy').addEventListener('click', ()=> { addToCartAction(false); toast('Proceeding to checkout (demo)'); });
+
+  // wishlist
+  $('#wishBtn').addEventListener('click', toggleWishlist);
+  $('#openCart').addEventListener('click', openCartDrawer);
+  $('#closeCart').addEventListener('click', closeCartDrawer);
+  $('#clearCart').addEventListener('click', ()=>{ state.cart=[]; saveCart(); renderCart(); toast('Cart cleared'); });
+
+  // checkout (demo)
+  $('#checkoutBtn').addEventListener('click', ()=> toast('Checkout flow would begin (demo)'));
+
+  // shipping
+  $('#checkShip').addEventListener('click', ()=> checkShipping($('#postal').value.trim()));
+
+  // contact seller (demo)
+  $('#contactSeller').addEventListener('click', ()=> toast('Message composer would open (demo)'));
+
+  // sticky mobile
+  window.addEventListener('resize', ()=> { /* could adjust UI */ });
+
+  // theme toggle (simple)
+  $('#themeToggle').addEventListener('click', ()=>{
+    const doc = document.documentElement;
+    const on = doc.classList.toggle('dark');
+    $('#themeToggle').setAttribute('aria-pressed', String(on));
+    if(on){
+      document.documentElement.style.setProperty('--bg','#0b1220');
+      document.documentElement.style.setProperty('--surface','#071026');
+      document.documentElement.style.setProperty('--ink','#e6eef8');
+      document.documentElement.style.setProperty('--muted','#9bb0d3');
+    } else {
+      document.documentElement.style.removeProperty('--bg');
+      document.documentElement.style.removeProperty('--surface');
+      document.documentElement.style.removeProperty('--ink');
+      document.documentElement.style.removeProperty('--muted');
+    }
+  });
+
+  // lightbox & magnifier
+  initMagnifier();
+
+  // tabs
+  initTabs();
+
+  // reviews & qa
+  initReviews();
+  initQA();
+
+  // sample similar items
+  renderSimilar();
+}
+
+/* run init after DOM ready */
+document.addEventListener('DOMContentLoaded', init);
+
+</script>
+</body>
+</html>

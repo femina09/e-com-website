@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Artificial Cynara Scolymus – Product Page (Etsy‑style)</title>
+  <style>
+    :root{
+      --brand:#f1641e; /* Etsy-ish accent (not using their brand assets) */
+      --ink:#111;
+      --muted:#666;
+      --line:#e6e6e6;
+      --bg:#fff;
+      --chip:#f5f5f5;
+      --success:#0a7d2a;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+    a{color:inherit}
+    .container{max-width:1200px;margin:auto;padding:0 16px}
+
+    /* Header */
+    header{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:50}
+    .header-wrap{display:flex;gap:16px;align-items:center;padding:12px 0}
+    .logo{font-weight:800;letter-spacing:.3px}
+    .search{flex:1;display:flex;gap:8px}
+    .search input{flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:999px;outline:none}
+    .search button{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:var(--chip);cursor:pointer}
+    .nav-ctas{display:flex;align-items:center;gap:12px}
+    .pill{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);cursor:pointer}
+    .cart-icon{position:relative}
+    .badge{position:absolute;top:-6px;right:-6px;background:var(--brand);color:#fff;font-size:11px;padding:2px 6px;border-radius:999px}
+
+    /* Layout */
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:28px;margin:24px 0}
+    @media (max-width:960px){.grid{grid-template-columns:1fr}}
+
+    /* Gallery */
+    .gallery{position:relative}
+    .main-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:12px;border:1px solid var(--line);background:#0000;cursor:zoom-in}
+    .thumbs{display:flex;gap:8px;margin-top:10px;overflow:auto;padding-bottom:4px}
+    .thumbs img{width:80px;height:80px;object-fit:cover;border:2px solid transparent;border-radius:8px;cursor:pointer}
+    .thumbs img.active{border-color:var(--brand)}
+
+    /* Lightbox */
+    .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:60}
+    .lightbox img{max-width:min(92vw,1200px);max-height:86vh;border-radius:12px}
+
+    /* Product Info */
+    .title{font-size:28px;line-height:1.2;margin:6px 0}
+    .shop{color:var(--muted)}
+    .rating{display:flex;align-items:center;gap:8px;color:#d69800}
+    .rating .count{color:var(--muted)}
+    .price-row{display:flex;align-items:center;gap:12px;margin:8px 0}
+    .price{font-size:28px;font-weight:800}
+    .chip{background:var(--chip);border:1px solid var(--line);padding:4px 8px;border-radius:999px;font-size:12px}
+    .ok{color:var(--success);font-weight:600}
+
+    .variations{display:grid;gap:12px;margin:16px 0}
+    .var-label{font-weight:600}
+    .options{display:flex;flex-wrap:wrap;gap:8px}
+    .opt{padding:8px 12px;border:1px solid var(--line);border-radius:999px;cursor:pointer;background:#fff}
+    .opt[aria-checked="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+
+    .qty-row{display:flex;align-items:center;gap:8px;margin:8px 0}
+    .qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+    .qty button{width:36px;height:36px;border:0;background:var(--chip);cursor:pointer}
+    .qty input{width:56px;text-align:center;border:0;outline:none}
+
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .btn{padding:12px 16px;border-radius:8px;border:1px solid var(--ink);background:#fff;font-weight:700;cursor:pointer}
+    .btn.primary{background:var(--ink);color:#fff}
+    .btn.accent{background:var(--brand);border-color:var(--brand);color:#fff}
+    .wish{display:inline-flex;align-items:center;gap:6px}
+
+    .safe{display:flex;gap:10px;margin-top:12px;color:var(--muted)}
+
+    /* Seller card */
+    .seller{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;gap:12px;align-items:center;margin-top:16px}
+    .seller img{width:56px;height:56px;border-radius:50%;object-fit:cover;border:1px solid var(--line)}
+    .seller .meta{flex:1}
+
+    /* Tabs */
+    .tabs{display:flex;gap:18px;border-bottom:1px solid var(--line);margin-top:24px}
+    .tab{padding:12px 4px;cursor:pointer;border-bottom:2px solid transparent}
+    .tab.active{border-color:var(--ink);font-weight:700}
+    .panel{display:none;padding:16px 0}
+    .panel.active{display:block}
+
+    /* FAQ */
+    .faq{border:1px solid var(--line);border-radius:12px}
+    .faq-item+ .faq-item{border-top:1px solid var(--line)}
+    .faq-q{padding:12px 14px;cursor:pointer;background:#fff}
+    .faq-a{padding:0 14px 14px 14px;display:none;color:var(--muted)}
+    .faq-item.open .faq-a{display:block}
+
+    /* Similar carousel */
+    .carousel{display:flex;gap:12px;overflow:auto;padding:8px 0}
+    .card{min-width:180px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .card img{width:100%;height:140px;object-fit:cover}
+    .card .p{padding:8px}
+
+    /* Sticky mobile bar */
+    .sticky-bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:none;gap:8px;padding:10px;z-index:40}
+    .sticky-bar .btn{flex:1}
+    @media (max-width:720px){.sticky-bar{display:flex}}
+
+    /* Drawer cart */
+    .drawer{position:fixed;top:0;right:-400px;height:100vh;width:360px;max-width:90vw;background:#fff;border-left:1px solid var(--line);box-shadow:-10px 0 30px rgba(0,0,0,.08);transition:right .35s ease;z-index:70;display:flex;flex-direction:column}
+    .drawer.open{right:0}
+    .drawer header{padding:14px;border-bottom:1px solid var(--line)}
+    .drawer .items{flex:1;overflow:auto;padding:12px}
+    .drawer .item{display:flex;gap:10px;border-bottom:1px solid var(--line);padding:10px 0}
+    .drawer footer{border-top:1px solid var(--line);padding:12px}
+
+    /* Toast */
+    .toast{position:fixed;top:16px;right:16px;background:var(--ink);color:#fff;padding:10px 14px;border-radius:8px;opacity:0;transform:translateY(-8px);transition:.3s;z-index:80}
+    .toast.show{opacity:1;transform:translateY(0)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container header-wrap">
+      <div class="logo">ShopCraft</div>
+      <form class="search" onsubmit="event.preventDefault()">
+        <input type="search" placeholder="Search for items or shops" aria-label="Search" />
+        <button type="submit" aria-label="Search">Search</button>
+      </form>
+      <div class="nav-ctas">
+        <button class="pill" id="toggleTheme" aria-pressed="false">🌙</button>
+        <button class="pill cart-icon" id="openCart">🛒 Cart <span class="badge" id="cartCount">0</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <nav style="margin:14px 0; color:var(--muted); font-size:14px;">Home › Artificial Plants › Faux Flowers</nav>
+
+    <section class="grid" aria-label="Product">
+      <!-- Gallery -->
+      <div class="gallery">
+        <img id="mainImg" class="main-img" src="https://images.unsplash.com/photo-1524593166156-312f362cadae?q=80&w=1400&auto=format&fit=crop" alt="Artificial artichoke plant on a table" />
+        <div class="thumbs" id="thumbs">
+          <img src="https://images.unsplash.com/photo-1524593166156-312f362cadae?q=80&w=400&auto=format&fit=crop" alt="thumb 1" class="active" />
+          <img src="https://images.unsplash.com/photo-1532635223-7fb3f93a1a2a?q=80&w=400&auto=format&fit=crop" alt="thumb 2" />
+          <img src="https://images.unsplash.com/photo-1498843053639-170ff2122f35?q=80&w=400&auto=format&fit=crop" alt="thumb 3" />
+          <img src="https://images.unsplash.com/photo-1585320806297-9794b3a2d7d5?q=80&w=400&auto=format&fit=crop" alt="thumb 4" />
+        </div>
+        <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog">
+          <img alt="enlarged product image" />
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div>
+        <h1 class="title">Artificial Cynara Scolymus – Quality Faux Artichoke Plant</h1>
+        <div class="shop">by <strong>GreenDecor</strong> • <span class="rating" aria-label="4.8 out of 5 stars">★★★★★ <span class="count" id="reviewCount">(127 reviews)</span></span></div>
+
+        <div class="price-row">
+          <div class="price" id="price" aria-live="polite">$39.99</div>
+          <span class="chip">Free shipping over $35</span>
+          <span class="chip ok">In stock</span>
+        </div>
+
+        <div class="variations">
+          <div>
+            <div class="var-label">Size</div>
+            <div class="options" role="listbox" aria-label="Size" id="sizeOpts">
+              <button class="opt" role="option" aria-checked="true">Small (12")</button>
+              <button class="opt" role="option" aria-checked="false">Medium (18")</button>
+              <button class="opt" role="option" aria-checked="false">Large (24")</button>
+            </div>
+          </div>
+          <div>
+            <div class="var-label">Color</div>
+            <div class="options" role="listbox" aria-label="Color" id="colorOpts">
+              <button class="opt" role="option" aria-checked="true">Natural Green</button>
+              <button class="opt" role="option" aria-checked="false">Olive</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="qty-row">
+          <label for="qtyInput" class="var-label" style="min-width:70px">Quantity</label>
+          <div class="qty">
+            <button type="button" id="decQty" aria-label="Decrease quantity">−</button>
+            <input id="qtyInput" type="number" min="1" value="1" aria-live="polite" />
+            <button type="button" id="incQty" aria-label="Increase quantity">+</button>
+          </div>
+          <span id="stockMsg" class="chip">Only 10 left!</span>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" id="addCart">Add to cart</button>
+          <button class="btn accent" id="buyNow">Buy now</button>
+          <button class="btn wish" id="wishBtn" aria-pressed="false">❤ Add to wishlist</button>
+        </div>
+
+        <div class="safe">
+          <span>✓ 30‑day returns</span>
+          <span>✓ Secure checkout</span>
+        </div>
+
+        <div class="seller">
+          <img src="https://images.unsplash.com/photo-1544006659-f0b21884ce1d?q=80&w=300&auto=format&fit=crop" alt="Seller avatar" />
+          <div class="meta">
+            <div><strong>GreenDecor Shop</strong></div>
+            <div style="color:var(--muted)">Selling since 2018 • 4,500+ sales</div>
+          </div>
+          <button class="btn" id="contactSeller">Contact shop</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Tabs -->
+    <div class="tabs" role="tablist">
+      <button class="tab active" role="tab" aria-selected="true">Description</button>
+      <button class="tab" role="tab" aria-selected="false">Details</button>
+      <button class="tab" role="tab" aria-selected="false">Reviews</button>
+      <button class="tab" role="tab" aria-selected="false">Shipping & returns</button>
+    </div>
+
+    <section class="panel active" id="descPanel">
+      <p>This artificial Cynara scolymus (artichoke) brings a Mediterranean touch to any room — realistic texture, zero maintenance. Hand‑crafted with durable silk and plastic. Great for kitchen counters, bookshelves, and office desks.</p>
+      <ul>
+        <li>Realistic color gradients and leaf texture</li>
+        <li>Durable, fade‑resistant materials</li>
+        <li>Available in 12", 18", and 24" heights</li>
+      </ul>
+      <button class="pill" id="moreBtn">Read more</button>
+    </section>
+
+    <section class="panel" id="detailsPanel">
+      <ul>
+        <li><strong>Materials:</strong> Silk, plastic, wire stems</li>
+        <li><strong>Weights:</strong> 0.5 lb / 0.8 lb / 1.2 lb</li>
+        <li><strong>Care:</strong> Dust with a soft cloth</li>
+        <li><strong>SKU:</strong> GD‑AS‑001</li>
+      </ul>
+    </section>
+
+    <section class="panel" id="reviewsPanel">
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
+        <div style="font-size:28px;color:#d69800">★★★★★</div>
+        <div class="chip" id="avgRating">4.8 average</div>
+        <select id="reviewSort" class="pill" aria-label="Sort reviews">
+          <option value="recent">Most recent</option>
+          <option value="high">Highest rating</option>
+          <option value="low">Lowest rating</option>
+        </select>
+      </div>
+      <div id="reviewList"></div>
+      <form id="reviewForm" style="margin-top:16px;display:grid;gap:8px">
+        <strong>Leave a review</strong>
+        <label>Rating:
+          <select id="newRating">
+            <option>5</option><option>4</option><option>3</option><option>2</option><option>1</option>
+          </select>
+        </label>
+        <textarea id="newText" rows="3" placeholder="Share your thoughts…"></textarea>
+        <button class="btn" type="submit">Submit review</button>
+      </form>
+    </section>
+
+    <section class="panel" id="shipPanel">
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+        <div>Estimate delivery:</div>
+        <input id="zip" class="pill" placeholder="Enter ZIP / PIN" style="min-width:180px" />
+        <button class="pill" id="calcShip">Check</button>
+        <div id="eta" class="chip" aria-live="polite"></div>
+      </div>
+      <p style="margin-top:10px;color:var(--muted)">Ships in 1–2 business days from California. International rates vary by destination.</p>
+    </section>
+
+    <!-- FAQ -->
+    <h3 style="margin:20px 0 8px">FAQs</h3>
+    <div class="faq" id="faq">
+      <div class="faq-item">
+        <div class="faq-q">Is the plant UV‑resistant?</div>
+        <div class="faq-a">Yes. It won’t noticeably fade with typical indoor sunlight exposure.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Does it include a pot?</div>
+        <div class="faq-a">Comes with a simple nursery pot. Decorative pots sold separately.</div>
+      </div>
+    </div>
+
+    <!-- Similar items -->
+    <h3 style="margin:20px 0 8px">You might also like</h3>
+    <div class="carousel">
+      <div class="card"><img src="https://images.unsplash.com/photo-1526378722484-bd91ca387e72?q=80&w=600&auto=format&fit=crop" alt="Similar item"/><div class="p"><strong>Olive Branch Spray</strong><div>$24.00</div></div></div>
+      <div class="card"><img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?q=80&w=600&auto=format&fit=crop" alt="Similar item"/><div class="p"><strong>Faux Eucalyptus</strong><div>$18.50</div></div></div>
+      <div class="card"><img src="https://images.unsplash.com/photo-1467043198406-dc953a3defd6?q=80&w=600&auto=format&fit=crop" alt="Similar item"/><div class="p"><strong>Fiddle Leaf Stem</strong><div>$29.00</div></div></div>
+      <div class="card"><img src="https://images.unsplash.com/photo-1470115636492-6d2b56f9146e?q=80&w=600&auto=format&fit=crop" alt="Similar item"/><div class="p"><strong>Succulent Bundle</strong><div>$16.00</div></div></div>
+    </div>
+
+  </main>
+
+  <!-- Sticky mobile bar -->
+  <div class="sticky-bar">
+    <button class="btn" id="stickyCart">Add to cart</button>
+    <button class="btn accent" id="stickyBuy">Buy now</button>
+  </div>
+
+  <!-- Drawer Cart -->
+  <aside class="drawer" id="drawer">
+    <header class="header-wrap" style="justify-content:space-between">
+      <strong>Your cart</strong>
+      <button class="pill" id="closeCart">Close</button>
+    </header>
+    <div class="items" id="cartItems"></div>
+    <footer>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <strong>Total</strong>
+        <strong id="cartTotal">$0.00</strong>
+      </div>
+      <button class="btn accent" style="width:100%" id="checkout">Checkout</button>
+    </footer>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // Theme toggle
+    const toggleTheme=document.getElementById('toggleTheme');
+    toggleTheme.addEventListener('click',()=>{
+      const dark=document.documentElement.classList.toggle('dark');
+      toggleTheme.setAttribute('aria-pressed',String(dark));
+    });
+
+    // Lightbox
+    const mainImg=document.getElementById('mainImg');
+    const lightbox=document.getElementById('lightbox');
+    mainImg.addEventListener('click',()=>{
+      lightbox.style.display='flex';
+      lightbox.querySelector('img').src=mainImg.src;
+      lightbox.setAttribute('aria-hidden','false');
+    });
+    lightbox.addEventListener('click',()=>{
+      lightbox.style.display='none';
+      lightbox.setAttribute('aria-hidden','true');
+    });
+
+    // Thumbnails
+    const thumbs=document.getElementById('thumbs');
+    thumbs.addEventListener('click',e=>{
+      if(e.target.tagName==='IMG'){
+        mainImg.src=e.target.src.replace('w=400','w=1400');
+        thumbs.querySelectorAll('img').forEach(i=>i.classList.remove('active'));
+        e.target.classList.add('active');
+      }
+    });
+
+    // Variations toggle
+    function makeToggleGroup(id){
+      const root=document.getElementById(id);
+      root.addEventListener('click',e=>{
+        if(e.target.classList.contains('opt')){
+          [...root.querySelectorAll('.opt')].forEach(b=>b.setAttribute('aria-checked','false'));
+          e.target.setAttribute('aria-checked','true');
+        }
+      });
+    }
+    makeToggleGroup('sizeOpts');
+    makeToggleGroup('colorOpts');
+
+    // Quantity
+    const qtyInput=document.getElementById('qtyInput');
+    document.getElementById('incQty').onclick=()=>qtyInput.value=+qtyInput.value+1;
+    document.getElementById('decQty').onclick=()=>qtyInput.value=Math.max(1,+qtyInput.value-1);
+
+    // Stock simulation
+    let stock=10; const stockMsg=document.getElementById('stockMsg');
+    function consumeStock(q){ stock=Math.max(0,stock-q); stockMsg.textContent=stock?`Only ${stock} left!`:'Out of stock'; }
+
+    // Toast helper
+    const toast=document.getElementById('toast');
+    function showToast(msg){
+      toast.textContent=msg; toast.classList.add('show');
+      setTimeout(()=>toast.classList.remove('show'),1800);
+    }
+
+    // Cart drawer
+    const drawer=document.getElementById('drawer');
+    const cartCount=document.getElementById('cartCount');
+    const cartItemsEl=document.getElementById('cartItems');
+    const cartTotalEl=document.getElementById('cartTotal');
+    let cart=[];
+
+    function openCart(){ drawer.classList.add('open'); }
+    function closeCart(){ drawer.classList.remove('open'); }
+
+    document.getElementById('openCart').onclick=openCart;
+    document.getElementById('closeCart').onclick=closeCart;
+
+    function renderCart(){
+      cartItemsEl.innerHTML='';
+      let total=0;
+      cart.forEach((it,idx)=>{
+        total+=it.price*it.qty;
+        const row=document.createElement('div');
+        row.className='item';
+        row.innerHTML=`<img src="${it.img}" alt="cart item" style="width:64px;height:64px;object-fit:cover;border:1px solid var(--line);border-radius:8px">`
+        +`<div style="flex:1"><div><strong>${it.title}</strong></div>`
+        +`<div style="color:var(--muted);font-size:13px">${it.size} • ${it.color}</div>`
+        +`<div>$${it.price.toFixed(2)} × ${it.qty}</div></div>`
+        +`<button class="pill" aria-label="Remove item">Remove</button>`;
+        row.querySelector('button').onclick=()=>{ cart.splice(idx,1); updateCart(); };
+        cartItemsEl.appendChild(row);
+      });
+      cartTotalEl.textContent='$'+total.toFixed(2);
+      cartCount.textContent=cart.reduce((a,b)=>a+b.qty,0);
+    }
+    function updateCart(){ renderCart(); }
+
+    function addToCart(){
+      const size=document.querySelector('#sizeOpts .opt[aria-checked="true"]').textContent;
+      const color=document.querySelector('#colorOpts .opt[aria-checked="true"]').textContent;
+      const qty=+qtyInput.value;
+      if(stock<qty){ showToast('Not enough stock'); return; }
+      const item={title:'Artificial Cynara Scolymus', img:mainImg.src, price:39.99, size, color, qty};
+      cart.push(item); consumeStock(qty); updateCart(); openCart(); showToast('Added to cart');
+    }
+
+    document.getElementById('addCart').onclick=addToCart;
+    document.getElementById('buyNow').onclick=()=>{ addToCart(); showToast('Proceeding to checkout…'); };
+    document.getElementById('stickyCart').onclick=addToCart;
+    document.getElementById('stickyBuy').onclick=()=>{ addToCart(); showToast('Proceeding to checkout…'); };
+
+    // Wishlist
+    const wishBtn=document.getElementById('wishBtn');
+    wishBtn.onclick=()=>{
+      const on=wishBtn.getAttribute('aria-pressed')==='true';
+      wishBtn.setAttribute('aria-pressed', String(!on));
+      wishBtn.textContent = on ? '❤ Add to wishlist' : '♥ In wishlist';
+      showToast(on?'Removed from wishlist':'Saved to wishlist');
+    };
+
+    // Tabs
+    const tabs=[...document.querySelectorAll('.tab')];
+    const panels=[...document.querySelectorAll('.panel')];
+    tabs.forEach((t,i)=>t.addEventListener('click',()=>{
+      tabs.forEach(b=>b.classList.remove('active'));
+      panels.forEach(p=>p.classList.remove('active'));
+      t.classList.add('active'); panels[i].classList.add('active');
+    }));
+
+    // Description read more
+    document.getElementById('moreBtn').onclick=(e)=>{
+      const p=e.target.previousElementSibling;  
+      if(e.target.textContent.includes('more')){
+        p.insertAdjacentHTML('beforeend',' Additional notes: zero watering, realistic petal veining, and bendable stems for arranging.');
+        e.target.textContent='Read less';
+      } else { location.reload(); }
+    };
+
+    // Reviews (client-side demo data)
+    const data=[
+      {r:5,t:'Looks incredibly real. Fast shipping!',d:'2025-06-15'},
+      {r:4,t:'Nice quality, packaging could be better.',d:'2025-05-28'},
+      {r:5,t:'Perfect for my kitchen shelf!',d:'2025-05-10'}
+    ];
+    const list=document.getElementById('reviewList');
+    function renderReviews(arr){
+      list.innerHTML='';
+      arr.forEach(x=>{
+        const el=document.createElement('div');
+        el.style.borderBottom='1px solid var(--line)';
+        el.style.padding='10px 0';
+        el.innerHTML=`<div style="color:#d69800">${'★'.repeat(x.r)}${'☆'.repeat(5-x.r)}</div>`
+          +`<div style="color:var(--muted);font-size:13px">${x.d}</div>`
+          +`<div>${x.t}</div>`;
+        list.appendChild(el);
+      });
+      const avg=(arr.reduce((a,b)=>a+b.r,0)/arr.length).toFixed(1);
+      document.getElementById('avgRating').textContent=avg+" average";
+      document.getElementById('reviewCount').textContent=`(${arr.length} reviews)`;
+    }
+    renderReviews(data);
+    document.getElementById('reviewSort').onchange=(e)=>{
+      const v=e.target.value; let arr=[...data];
+      if(v==='recent') arr.sort((a,b)=>new Date(b.d)-new Date(a.d));
+      if(v==='high') arr.sort((a,b)=>b.r-a.r);
+      if(v==='low') arr.sort((a,b)=>a.r-b.r);
+      renderReviews(arr);
+    };
+    document.getElementById('reviewForm').onsubmit=(e)=>{
+      e.preventDefault();
+      const r=+document.getElementById('newRating').value;
+      const t=document.getElementById('newText').value.trim();
+      if(!t) return showToast('Write a quick review');
+      data.unshift({r,t,d:new Date().toISOString().slice(0,10)});
+      renderReviews(data);
+      e.target.reset();
+      showToast('Thanks for your review!');
+    };
+
+    // Shipping ETA (very simple demo calc)
+    document.getElementById('calcShip').onclick=()=>{
+      const zip=document.getElementById('zip').value.trim();
+      const eta=document.getElementById('eta');
+      if(!zip){ eta.textContent='Enter a valid postal code'; return; }
+      const today=new Date();
+      const days = 5 + (zip.length%3); // mock variability
+      const arrive=new Date(today.getFullYear(),today.getMonth(),today.getDate()+days);
+      const fmt = arrive.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+      eta.textContent=`Estimated delivery: ${fmt}`;
+    };
+
+    // Contact seller (demo)
+    document.getElementById('contactSeller').onclick=()=>{
+      showToast('Opening message composer…');
+    };
+  </script>
+</body>
+</html>
